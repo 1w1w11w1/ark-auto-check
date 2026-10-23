@@ -1,0 +1,45 @@
+{
+  "name": "ark-auto-check",
+  "version": "0.1.0",
+  "description": "Skill plugin for DeepSeek Harness: reports which concrete model Volcengine Ark Agent Plan's AUTO (ark-code-latest) is currently routed to, by sampling a 1-355 random-number distribution and matching it against bundled fingerprints of 16 candidate models.",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "cordis.patch.yml",
+    "skills/",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "engines": {
+      "dsh": ">=0.1.5-rc.3 <0.3.0"
+    },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "skill",
+    "volcengine",
+    "ark",
+    "agent-plan",
+    "auto-routing",
+    "model-fingerprint"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1w1w11w1/ark-auto-check.git"
+  },
+  "license": "MIT",
+  "author": "1w1w11w1",
+  "peerDependencies": {
+    "@deepseek-ai/dsh-skill-filesystem": ">=0.1.0-rc.6 <0.3.0"
+  }
+}
