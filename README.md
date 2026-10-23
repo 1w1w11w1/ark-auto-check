@@ -1,4 +1,4 @@
-# dsh-skills
+# ark-auto-check
 
 适用于 [DeepSeek Harness](https://github.com/deepseek-ai)（DSH）的个人技能仓库。
 
@@ -20,7 +20,7 @@
 
 ## 安装
 
-方式一（推荐）：在 DSH 的技能管理（Skills Manager）中添加仓库 `1w1w11w1/dsh-skills`，启用 `auto-router-check`。
+方式一（推荐）：在 DSH 的技能管理（Skills Manager）中添加仓库 `1w1w11w1/ark-auto-check`，启用 `auto-router-check`。
 
 方式二（手动）：把 `skills/auto-router-check/` 整个目录复制到 `~/.dsh/skills/` 下（Windows：`%USERPROFILE%\.dsh\skills\`），重启会话即可。
 
