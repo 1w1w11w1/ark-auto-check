@@ -24,6 +24,32 @@ AUX_W = {"reasoning_lang": 0.35, "reasoning_tokens": 0.25, "prompt_tokens": 0.25
 SINGLE_W = 0.85
 MARGIN = 2.0  # combined 分差小于该值且互为近邻 → 不可区分
 
+# ---------------------------------------------------------------- 范围（Scope）
+# 本项目只用于识别火山方舟 Agent Plan（火山计划）中存在的模型。越界请求一律拒绝执行。
+ARK_CODE_LATEST = "ark-code-latest"
+PLAN_MODELS = (
+    "doubao-seed-evolving", "doubao-seed-2-1-pro-260915", "doubao-seed-2-1-lite-260915",
+    "doubao-seed-2-1-turbo-260628", "doubao-seed-2-0-lite-260215", "doubao-seed-2-0-mini-260428",
+    "kimi-k2-8-preview", "deepseek-v4-1-flash-261017", "deepseek-v4-1-flash-economy-261017",
+    "glm-5-3-flash-260828", "glm-5.3", "deepseek-v4-pro-ga-260813",
+    "deepseek-v4-flash-ga-260731", "kimi-k3", "kimi-k2.7-code", "minimax-m3",
+)
+SCOPE_NOTICE = ("范围：本工具只用于识别火山方舟 Agent Plan（火山计划）内存在的模型；"
+                "不识别计划外模型、其它平台，也不用于来源鉴定或能力测评。")
+
+
+def check_scope(target, models):
+    """返回拒绝理由；在范围内则返回空串。"""
+    allowed = set(PLAN_MODELS)
+    extra = [m for m in models if m not in allowed]
+    if extra:
+        return "拒绝执行：baselines.json 含火山计划之外的模型（%s）。%s" % ("、".join(extra), SCOPE_NOTICE)
+    if target not in allowed and target != ARK_CODE_LATEST:
+        return ("拒绝执行：target=%s 不在范围内，只接受 %s 或计划内 16 个模型之一。%s"
+                % (target, ARK_CODE_LATEST, SCOPE_NOTICE))
+    return ""
+
+
 # ---------------------------------------------------------------- 凭证
 def _resolve_cmd(cmd):
     import shutil
@@ -343,14 +369,19 @@ def main():
     ap.add_argument("--concurrency", type=int, default=6)
     ap.add_argument("--base-url", default=None)
     ap.add_argument("--api-key", default=None)
-    ap.add_argument("--target", default="ark-code-latest")
+    ap.add_argument("--target", default="ark-code-latest",
+                    help="只能是 ark-code-latest（AUTO 入口）或计划内模型（自检抽查）")
     ap.add_argument("--baselines", default=os.path.join(HERE, "baselines.json"))
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
-    base_url, key = resolve_credential(args.base_url, args.api_key)
     pack = json.load(open(args.baselines, encoding="utf-8"))
     models = pack["models"]
+    refusal = check_scope(args.target, models)
+    if refusal:  # 越界先拒绝，连凭证都不去取
+        print(refusal, file=sys.stderr)
+        return 3
+    base_url, key = resolve_credential(args.base_url, args.api_key)
     if not args.json:
         print("target=%s n=%d candidates=%d baselines=%s" %
               (args.target, args.n, len(models), pack.get("captured_at_iso", "?")), flush=True)

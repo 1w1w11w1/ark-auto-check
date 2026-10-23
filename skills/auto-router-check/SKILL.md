@@ -9,6 +9,22 @@ description: 检测火山方舟 Agent Plan 的 AUTO（客户端模型 ark-code-l
 用户想确认火山方舟 Agent Plan 的 AUTO（客户端模型名 ark-code-latest）**当前**实际路由到哪个具体模型时。
 路由可能随官方策略漂移，本 skill 给的是「当下这一时点」的判定。
 
+
+## 范围（Scope）：只识别火山计划内模型
+
+**本 skill 只用于识别火山方舟 Agent Plan（火山计划）中存在的模型**：
+把 AUTO 入口 `ark-code-latest` 的随机数分布指纹，与内置 16 个计划候选模型基准比对，
+回答「这次 AUTO 被路由到了计划里的哪个模型」。
+
+- ✅ 可回答：AUTO 当前路由到哪个计划内模型；计划内某模型与 AUTO 像不像（`--target` 抽查）；
+  指纹库覆盖计划内哪些模型。
+- ❌ 不可用于：识别计划外模型（其它厂商 / Coding Plan / 按量平台 / 第三方中转站 / 自建服务）、
+  判断某个中转站是否偷换模型、来源鉴定与维权、能力测评或榜单。
+
+`quick_probe.py` 已内置该断言：`--target` 只接受 `ark-code-latest` 或 16 个计划内模型；
+baselines.json 若含计划外模型会直接拒绝执行（exit 3，stderr 说明范围）。
+遇到越界请求时：**先说明范围限制，再拒绝越界部分**，不要改装探针去测计划外模型。
+
 ## 原理（一句话）
 AUTO 的响应不透露真实模型（响应体 model 字段只回 "auto"），因此对 ark-code-latest 做约 150 次
 「1–355 随机数」采样，把分布指纹与本目录 baselines.json 的 16 个候选模型基准指纹比对
